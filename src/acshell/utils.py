@@ -1,20 +1,76 @@
 import http
+import json
 from pathlib import Path
-from typing import Optional
+from typing import Dict, Optional
 
 import appdirs
 from bs4 import BeautifulSoup
 import requests
 
+from src.acshell.exceptions import ACShellException
+
 
 ENCODING = 'utf-8'
+JSON_NAME = '.contest.json'
 user_data_dir = Path(appdirs.user_data_dir('acshell'))
 user_cache_dir = Path(appdirs.user_cache_dir('acshell'))
 cookie_path = user_data_dir / 'cookie.jar'
 
 
+
+def load_json(json_path: Optional[Path] = None) -> Dict:
+    """.contest.jsonを読み込む
+    """
+    if json_path is None:
+        current_dir = Path.cwd()
+        json_path = current_dir / JSON_NAME
+    
+    assert json_path.name == JSON_NAME
+    if json_path.exists():
+        with json_path.open(encoding=ENCODING) as f:
+            data = json.load(f)
+    else:
+        raise RuntimeError
+
+    return data
+
+
+def save_json(json_path: Path, data: Dict) -> Path:
+    """.contest.jsonに書き込む
+    """
+    try:
+        if json_path.is_dir():
+            json_path = json_path / JSON_NAME
+        with json_path.open(mode='w', encoding=ENCODING) as f:
+            json.dump(data, f)
+    except Exception:
+        raise RuntimeError(f'Failed to save contest info: {json_path.parent}') 
+
+    return json_path
+
+
+def search_json() -> Optional[Path]:
+    """上位ディレクトリにcontest.jsonがあるかどうかを調べる
+    """
+    cur_dir = Path.cwd()
+    root_dir = Path(cur_dir.root)
+    while cur_dir != root_dir:
+        try:
+            json_path = cur_dir / JSON_NAME
+            if json_path.is_file():
+                return json_path
+
+            cur_dir = cur_dir.parent
+        except Exception:
+            break
+
+    return None
+
+
 def get_soup(session: requests.Session, url: str) -> BeautifulSoup:
     response = session.get(url)
+    if response.status_code != 200:
+        raise ACShellException
     soup = BeautifulSoup(response.text, 'lxml')
     return soup
 
@@ -82,3 +138,5 @@ class CookieSession(requests.Session):
             self.is_logined = False
         else:
             self.is_logined = True
+        
+        return response
