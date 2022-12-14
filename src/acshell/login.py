@@ -29,11 +29,10 @@ def login(logger: logging.Logger, argv: Sequence[str]) -> bool:
         post_res = session.post(URL.LOGIN, data=data)
         if post_res.status_code == 200 and 'login' not in post_res.url:
             # ログイン成功してトップページにリダイレクトしたとき
-            logger.info('ログインに成功しました')
+            logger.info('Login success')
             return 0
 
         soup = BeautifulSoup(post_res.text, 'lxml')
         _container = soup.select_one('#main-container')
         error_text = _container.select_one('.alert').text.strip().replace('×\n ', '')
-        logger.error(f'ログインに失敗しました: {error_text}')
-        return 0
+        raise RuntimeError(f'Login failure: {error_text}')
