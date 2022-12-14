@@ -20,7 +20,7 @@ def __scrape_testcase(session, contest_code: str, task_code: str) -> Dict:
         soup = get_soup(session, URL.task(contest_code, task_code))
     except ACShellException:
         raise RuntimeError(f'Failed to scrape testcase: {contest_code} - {task_code}')
-    
+
     testcase_l: List[Dict] = []
     for part in soup.select_one('#task-statement').select('.part'):
         part_title = part.select_one('h3').text[:3]
@@ -63,7 +63,7 @@ def fetch_task(logger: Logger, json_path: Path, contest_info: Dict):
         except ACShellException:
             # 非公開
             raise RuntimeError(f'contest tasks are unpublished: {contest_code}')
-        
+
         # 問題一覧の取得
         task_list = __scrape_task_list(soup)
         contest_info['tasks'] = task_list
@@ -79,6 +79,6 @@ def fetch_task(logger: Logger, json_path: Path, contest_info: Dict):
             # テストケースの作成
             testcase_l = __scrape_testcase(session, contest_code, task_info['code'])
             contest_info['tasks'][task_key]['testcases'] = testcase_l
-        
+
         save_json(json_path, contest_info)
         logger.info('task testcases appended')

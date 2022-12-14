@@ -45,7 +45,7 @@ def __fetch_contest_info(contest_code: str) -> Dict:
         if res.url not in URL.SETTINGS:
             # ログインしていない
             raise RuntimeError('not logged in')
-        
+
         # コンテストが存在することを確認する
         try:
             soup = get_soup(session, URL.contest(contest_code))
@@ -60,7 +60,7 @@ def __fetch_contest_info(contest_code: str) -> Dict:
             new_dir.mkdir(parents=True)
         except Exception:
             raise RuntimeError(f'Failed to make contest directory: {contest_code}')
-        
+
         contest_info = __scrape_contest_info(contest_code, soup)
         # 保存する
         json_path = save_json(new_dir, contest_info)
