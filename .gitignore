@@ -1,7 +1,9 @@
 .DS_Store
 __pycache__
-.python-version
-.venv/
+*.python-version
+*.venv/*
+build/
 *.egg
 *.egg-info
 *.log
+*.json
