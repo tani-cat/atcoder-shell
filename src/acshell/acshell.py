@@ -2,6 +2,7 @@ from logging import getLogger, StreamHandler, INFO, Formatter
 from typing import Sequence
 
 from .contest.contest import load_contest
+from .contest.task import check_testcase
 from . import help, login
 
 
@@ -15,7 +16,7 @@ class ACShell:
         # 制御
         self.exec_code = 0
         self.logger = getLogger('acshell')
-        # logger.setLevel(DEBUG)
+        self.logger.setLevel(INFO)
 
         if not self.logger.hasHandlers():
             # Stream: ログの標準出力
@@ -47,7 +48,7 @@ class ACShell:
         elif _exec_command == 'load':
             return load_contest(self.logger, argv[1:])
         elif _exec_command == 'check':
-            raise NotImplementedError
+            return check_testcase(self.logger, argv[1:])
         elif _exec_command == 'submit':
             raise NotImplementedError
         else:
