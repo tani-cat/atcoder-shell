@@ -5,7 +5,7 @@ from typing import Dict, Optional, Sequence, List
 
 from bs4 import BeautifulSoup
 
-from ..const import ENCODING
+from ..consts import ENCODING
 from ..utils import (
     CookieSession, URL, get_soup, save_json, search_contest_json, load_json,
     get_cheet_dir,
@@ -235,6 +235,7 @@ def __generate_contest_dir(logger: Logger, contest_code: str) -> Contest:
 
     # フォルダを作成する
     current_dir = Path.cwd()
+
     new_dir = current_dir.joinpath(contest_code)
     try:
         new_dir.mkdir(parents=True)

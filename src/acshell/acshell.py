@@ -2,8 +2,7 @@ from logging import getLogger, StreamHandler, INFO, Formatter
 from typing import Sequence
 
 from .contest.contest import load_contest
-from .contest.task import check_testcase
-from . import help, login
+from . import help, login, cheetsheet, task_run
 
 
 class ACShell:
@@ -48,9 +47,11 @@ class ACShell:
         elif _exec_command == 'load':
             return load_contest(self.logger, argv[1:])
         elif _exec_command == 'check':
-            return check_testcase(self.logger, argv[1:])
+            return task_run.check_testcase(self.logger, argv[1:])
         elif _exec_command == 'submit':
-            raise NotImplementedError
+            return task_run.submit_code(self.logger, argv[1:])
+        elif _exec_command == 'add-cheet':
+            return cheetsheet.extend_cheetsheet(self.logger, argv[1:])
         else:
             # その他の入力
             raise NotImplementedError
@@ -64,7 +65,7 @@ class ACShell:
         except KeyboardInterrupt:
             self.exec_code = 1
         except NotImplementedError:
-            self.logger.error(f'wrong command: {argv[0]}')
+            self.logger.error(f'不正なコマンド: {argv[0]}')
             self.exec_code = 1
         except RuntimeError as e:
             self.logger.error(e)

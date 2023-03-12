@@ -4,12 +4,11 @@ import os
 import re
 import subprocess
 import time
-from typing import Dict, List, Sequence, Tuple
+from typing import Dict, List, Tuple
 
-from ..const import ENCODING, LANG_TABLE
+from ..consts import ENCODING, LANG_TABLE
 from ..utils import (
-    get_soup, CookieSession, URL, save_json, load_json, get_cheet_dir,
-    print_bar, search_contest_json,
+    get_soup, CookieSession, URL, save_json, load_json, get_cheet_dir, print_bar,
 )
 
 
@@ -28,9 +27,9 @@ class Task:
         self.logger = logger
         if isinstance(json_path, Path):
             task_info = load_json(json_path)
-            self.logger.info('Task info checked')
+            self.logger.info('問題情報を読み込みました')
         else:
-            raise RuntimeError('Not in contest directory')
+            raise RuntimeError('コンテストフォルダにいません')
 
         self.json_path = json_path
         self.testcases = []
@@ -73,7 +72,7 @@ class Task:
         # マージ対象となるモジュールをインポートしている場合は、そのモジュールのコードを追加する
         text_l = []
         for line in code_l:
-            reg_res = self.REG_IMPORT(line)
+            reg_res = self.REG_IMPORT.match(line.strip())
             if reg_res is None:
                 # インポート文の条件を満たさない
                 text_l.append(line)
@@ -82,10 +81,13 @@ class Task:
             for module_name in reg_res.groups():
                 if module_name in codefile_table:
                     # モジュールを読み込んでいた場合
-                    text_l.append('\n')
+                    if len(text_l) > 0:
+                        text_l.append('\n')
                     module_path: Path = codefile_table[module_name]
                     with module_path.open(encoding=ENCODING) as mf:
-                        text_l.append(mf.readlines())
+                        ext_l = [text for text in mf.readlines() if len(text.strip()) > 0]
+                        text_l.extend(ext_l)
+
                     text_l.append('\n')
                     break
             else:
@@ -97,52 +99,7 @@ class Task:
         with merged_py.open(mode='w', encoding=ENCODING) as wf:
             wf.writelines(text_l)
 
-    def update_testcase(self):
-        """テストケースの取得更新
-        """
-        with CookieSession() as session:
-            try:
-                soup = get_soup(session, URL.task(self.contest, self.code))
-            except RuntimeError:
-                raise RuntimeError(f'Failed to scrape testcase: {self.contest} - {self.code}')
-
-        testcase_l: List[Dict] = []
-        for part in soup.select_one('#task-statement').select('.part'):
-            part_title = part.select_one('h3').text[:3]
-            if part_title == '入力例':
-                testcase_l.append(dict())
-                testcase_l[-1]['input'] = part.select_one('pre').text.replace('\r', '')
-            elif part_title == '出力例':
-                testcase_l[-1]['output'] = part.select_one('pre').text.replace('\r', '')
-
-        if len(testcase_l):
-            self.testcases = testcase_l
-            save_json(self.json_path, self.task_info)
-            self.logger.info(f'Task testcases updated: {self.code}')
-
-    def run_testcase(self, lang: str) -> None:
-        """テストケースの実行
-        """
-        if not self.testcases:
-            self.update_testcase()
-
-        # TODO: コードファイルのマージ機能
-        codefile_path = self.json_path.parent.joinpath(self.code + '.py')
-        os.chdir(str(self.json_path.parent))
-
-        counter = {True: 0, False: 0}
-        for case in self.testcases:
-            res_flg, res_text = \
-                self.__execute_code(lang, codefile_path, case['input'], case['output'])
-            counter[res_flg] += 1
-            if res_flg:
-                self.logger.info(res_text)
-            else:
-                self.logger.error(res_text)
-
-            print_bar()
-
-        self.logger.info(f'All testcases have finished:\n{counter[True]} OK, {counter[False]} NG')
+        return merged_py
 
     def __execute_code(
         self, lang: str, codefile_path: Path, test_in: str, test_out: str,
@@ -150,7 +107,7 @@ class Task:
         res_text = []
         res_flg = False
         if lang not in LANG_TABLE:
-            raise RuntimeError(f'Not implemented lang: {lang}')
+            raise RuntimeError(f'定義されていない言語: {lang}')
 
         exec_lang = LANG_TABLE[lang]
         try:
@@ -195,32 +152,86 @@ class Task:
         res_text[0] += f' (in {lang})'
         return res_flg, '\n'.join(res_text)
 
+    def update_testcase(self):
+        """テストケースの取得更新
+        """
+        with CookieSession() as session:
+            try:
+                soup = get_soup(session, URL.task(self.contest, self.code))
+            except RuntimeError:
+                raise RuntimeError(f'テストケースの取得に失敗しました: {self.contest} - {self.code}')
 
-def check_testcase(logger: Logger, argv: Sequence[str]) -> int:
-    """公式のテストケースでチェックする
-    """
-    # 引数の処理
-    lang = ''
-    task = ''
-    if len(argv) >=2:
-        task = argv[1]
-    if len(argv) >= 1:
-        lang = argv[0]
-    else:
-        raise RuntimeError('Lack of arguments')
+        testcase_l: List[Dict] = []
+        for part in soup.select_one('#task-statement').select('.part'):
+            part_title = part.select_one('h3').text[:3]
+            if part_title == '入力例':
+                testcase_l.append(dict())
+                testcase_l[-1]['input'] = part.select_one('pre').text.replace('\r', '')
+            elif part_title == '出力例':
+                testcase_l[-1]['output'] = part.select_one('pre').text.replace('\r', '')
 
-    current_dir = Path.cwd()
-    # TODO: 深いところでも再帰的に探せるようにする
-    task_path = current_dir.joinpath('.task.json')
-    if task:
-        contest_json = search_contest_json()
-        if contest_json is None:
-            raise RuntimeError('Not in acshell directory')
-        task_path = contest_json.parent / task / '.task.json'
-    if task_path.is_file():
-        task = Task(logger, task_path)
-        task.run_testcase(lang)
-    else:
-        raise RuntimeError(f'Wrong task path: {task_path}')
+        if len(testcase_l):
+            self.testcases = testcase_l
+            save_json(self.json_path, self.task_info)
+            self.logger.info(f'問題のテストケースを更新しました: {self.code}')
 
-    return 0
+    def run_testcase(self, lang: str) -> None:
+        """テストケースの実行
+        """
+        if not self.testcases:
+            self.update_testcase()
+
+        # TODO: コードファイルのマージ機能
+        codefile_path = self.json_path.parent.joinpath(self.code + '.py')
+        os.chdir(str(self.json_path.parent))
+
+        counter = {True: 0, False: 0}
+        for case in self.testcases:
+            res_flg, res_text = \
+                self.__execute_code(lang, codefile_path, case['input'], case['output'])
+            counter[res_flg] += 1
+            if res_flg:
+                self.logger.info(res_text)
+            else:
+                self.logger.error(res_text)
+
+            print_bar()
+
+        self.logger.info(f'テストの実行結果:\n{counter[True]} OK, {counter[False]} NG')
+
+    def submit_code(self, lang: str) -> None:
+        """提出
+        """
+        # 実行ファイルを1つにまとめる
+        merged_path = self.__merge_code_file()
+
+        with merged_path.open(encoding=ENCODING) as f:
+            code_text = f.read()
+
+        with CookieSession() as session:
+            try:
+                soup = get_soup(session, URL.submit(self.contest, self.code))
+            except RuntimeError:
+                raise RuntimeError(f'ページの取得に失敗しました: {self.contest}')
+
+            # post に必要なデータを整理する
+            lang_sel = soup.select_one(f'#select-lang-{self.code}').select_one('select')
+            lang_soup = lang_sel.select('option')
+            lang_dict = {x.text: x['value'] for x in lang_soup if len(x.text)}
+            data = {
+                'data.TaskScreenName': self.code,
+                'data.LanguageId': lang_dict[lang],
+                'sourceCode': code_text,
+                'csrf_token': soup.find('input', attrs={'name': 'csrf_token'})['value'],
+            }
+            res = session.post(URL.submit(self.contest, self.code), data=data)
+
+        if res.status_code == 200:
+            # 成功
+            self.logger.info(f'コードを提出しました: {self.key} (lang: {lang_dict[lang]})')
+        else:
+            # 失敗
+            raise RuntimeError(
+                f'コードの提出に失敗しました: {self.key} (lang: {lang_dict[lang]})\n'
+                f'Response Code: {res.status_code}'
+            )

@@ -14,7 +14,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         argv = sys.argv[1:]
 
     if len(argv) == 0:
-        print('no executable command')
+        print('実行コマンドが指定されていません')
         return 1
     instance = acshell.ACShell()
     instance.run(argv)

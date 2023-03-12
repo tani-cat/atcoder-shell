@@ -8,10 +8,11 @@ import appdirs
 from bs4 import BeautifulSoup
 import requests
 
-from .const import ENCODING
+from .consts import ENCODING
 
 
-JSON_NAME = '.contest.json'
+CONTEST_JSON_NAME = '.contest.json'
+TASK_JSON_NAME = '.task.json'
 user_data_dir = Path(appdirs.user_data_dir('acshell'))
 user_cache_dir = Path(appdirs.user_cache_dir('acshell'))
 cookie_path = user_data_dir / 'cookie.jar'
@@ -28,7 +29,7 @@ def load_json(json_path: Optional[Path] = None) -> Dict:
     """
     if json_path is None:
         current_dir = Path.cwd()
-        json_path = current_dir / JSON_NAME
+        json_path = current_dir / CONTEST_JSON_NAME
 
     if json_path.exists():
         with json_path.open(encoding=ENCODING) as f:
@@ -44,11 +45,11 @@ def save_json(json_path: Path, data: Dict) -> Path:
     """
     try:
         if json_path.is_dir():
-            json_path = json_path / JSON_NAME
+            json_path = json_path / CONTEST_JSON_NAME
         with json_path.open(mode='w', encoding=ENCODING) as f:
             json.dump(data, f)
     except Exception:
-        raise RuntimeError(f'Failed to save to: {json_path}')
+        raise RuntimeError(f'設定の保存に失敗しました: {json_path}')
 
     return json_path
 
@@ -60,7 +61,7 @@ def search_contest_json() -> Optional[Path]:
     root_dir = Path(cur_dir.root)
     while cur_dir != root_dir:
         try:
-            json_path = cur_dir / JSON_NAME
+            json_path = cur_dir / CONTEST_JSON_NAME
             if json_path.is_file():
                 return json_path
 
@@ -69,6 +70,23 @@ def search_contest_json() -> Optional[Path]:
             break
 
     return None
+
+
+def search_task_json(task_code: str) -> Optional[Path]:
+    """task.jsonがあるかどうかを調べる
+    """
+    # TODO: 深いところでも再帰的に探せるようにする
+    current_dir = Path.cwd()
+    task_path = current_dir.joinpath(TASK_JSON_NAME)
+    if task_code:
+        contest_json = search_contest_json()
+        if contest_json is None:
+            raise RuntimeError('コンテストのフォルダにいません')
+        task_path = contest_json.parent / task_code / TASK_JSON_NAME
+    if task_path.is_file():
+        return task_path
+
+    raise RuntimeError(f'タスクが見つかりません: {task_code}')
 
 
 def get_cheet_dir() -> Path:
@@ -84,7 +102,7 @@ def get_cheet_dir() -> Path:
 def get_soup(session: requests.Session, url: str) -> BeautifulSoup:
     response = session.get(url)
     if response.status_code != 200:
-        raise RuntimeError(f'Failed to get page of url: {url}')
+        raise RuntimeError(f'Webページの取得に失敗しました: {url}')
 
     soup = BeautifulSoup(response.text, 'lxml')
     return soup
@@ -107,6 +125,14 @@ class URL:
         _res = cls.contest(contest) + '/tasks'
         if isinstance(task, str):
             return _res + '/' + task
+
+        return _res
+
+    @classmethod
+    def submit(cls, contest: str, task: str = None) -> str:
+        _res = cls.contest(contest) + '/submit'
+        if isinstance(task, str):
+            return _res + '?taskScreenName=' + task
 
         return _res
 
