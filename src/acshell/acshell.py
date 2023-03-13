@@ -47,7 +47,9 @@ class ACShell:
             return result.recent_result(self.logger, argv[1:])
         elif _exec_command in ('status', 'rs'):
             return result.status(self.logger, argv[1:])
-        elif _exec_command == 'add-cheet':
+        elif _exec_command in ('edit-cheet', 'ec'):
+            return cheetsheet.open_cheet_dir(self.logger, argv[1:])
+        elif _exec_command in ('add-cheet', 'ac'):
             return cheetsheet.extend_cheetsheet(self.logger, argv[1:])
         else:
             # その他の入力

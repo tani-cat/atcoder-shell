@@ -1,4 +1,5 @@
 from logging import Logger
+import subprocess
 from typing import Sequence
 
 from .consts import ENCODING
@@ -38,4 +39,12 @@ def extend_cheetsheet(logger: Logger, argv: Sequence[str]) -> int:
         wf.write(data)
 
     logger.info(f'チートシート: {sheet_name} -> {target_path.parent.parent}/{target_path.parent}')
+    return 0
+
+
+def open_cheet_dir(logger: Logger, argv: Sequence[str]) -> int:
+    """チートシートフォルダを開く"""
+    cheet_path = get_cheet_dir()
+    logger.info(f'フォルダ: {cheet_path}')
+    subprocess.run(f'open {cheet_path}', shell=True)
     return 0
