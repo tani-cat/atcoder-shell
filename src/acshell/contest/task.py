@@ -1,6 +1,6 @@
 from logging import Logger
-from pathlib import Path
 import os
+from pathlib import Path
 import re
 import subprocess
 import time
@@ -8,7 +8,7 @@ from typing import Dict, List, Tuple
 
 from ..consts import ENCODING, LANG_TABLE
 from ..utils import (
-    get_soup, CookieSession, URL, save_json, load_json, get_cheet_dir, print_bar,
+    get_soup, load_json, get_cheet_dir, print_bar, save_json, CookieSession, URL
 )
 
 
@@ -27,7 +27,7 @@ class Task:
         self.logger = logger
         if isinstance(json_path, Path):
             task_info = load_json(json_path)
-            self.logger.info('問題情報を読み込みました')
+            self.logger.debug('問題情報を読み込みました')
         else:
             raise RuntimeError('コンテストフォルダにいません')
 

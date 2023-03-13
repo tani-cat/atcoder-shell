@@ -16,10 +16,10 @@ class Contest:
     """コンテスト
     """
 
-    CONTEST_KEY = [
+    _CONTEST_KEY = [
         'code', 'title', 'start_dt', 'end_dt',
     ]
-    CONTEST_TASK_KEY = [
+    _CONTEST_TASK_KEY = [
         'code', 'name', 'score',
     ]
 
@@ -34,9 +34,9 @@ class Contest:
 
         if isinstance(json_path, Path):
             contest_info = load_json(json_path)
-            self.logger.info('Contest info checked')
+            self.logger.debug('コンテスト情報を取得')
         else:
-            raise RuntimeError('Not in contest directory')
+            raise RuntimeError('コンテストフォルダにいません')
 
         self.json_path = json_path
         self.tasks = dict()
@@ -62,21 +62,21 @@ class Contest:
     @property
     def contest_dict(self) -> Dict:
         resp = dict()
-        for key in self.CONTEST_KEY:
+        for key in self._CONTEST_KEY:
             resp[key] = self.__getattribute__(f'{key}')
 
         resp['tasks'] = dict()
         for t_key, task in self.tasks.items():
             resp['tasks'][t_key] = {
-                ct_key: task[ct_key] for ct_key in self.CONTEST_TASK_KEY
+                ct_key: task[ct_key] for ct_key in self._CONTEST_TASK_KEY
             }
 
         return resp
 
-    def task_path(self, key) -> Path:
+    def task_path(self, key: str) -> Path:
         return self.json_path.parent / key / '.task.json'
 
-    def task_dict(self, key) -> Dict:
+    def task_dict(self, key: str) -> Dict:
         resp = self.tasks[key]
         resp['contest'] = self.code  # contest.code
         resp['key'] = key
@@ -90,7 +90,7 @@ class Contest:
             try:
                 contest_soup = get_soup(session, URL.contest(self.code))
             except RuntimeError:
-                raise RuntimeError(f'unpublished contest: {self.code}')
+                raise RuntimeError(f'未公開のコンテストです: {self.code}')
 
             contest_info = self.__scrape_contest_info(contest_soup)
             for key, value in contest_info.items():
@@ -101,7 +101,7 @@ class Contest:
             try:
                 tasklist_soup = get_soup(session, URL.task(self.code))
             except RuntimeError:
-                raise RuntimeError(f'unpublished contest: {self.code}')
+                raise RuntimeError(f'未公開のコンテストです: {self.code}')
 
             task_info = self.__scrape_task_list(tasklist_soup)
             for key in task_info:
@@ -115,7 +115,7 @@ class Contest:
                 if key in self.tasks:
                     self.tasks[key]['score'] = score
                 else:
-                    self.logger.warning(f'Unknown task score: {key} - {score}')
+                    self.logger.warning(f'問題のスコア情報が不明です: {key} - {score}')
 
             # 設問情報を保存
             save_json(self.json_path, self.contest_dict)
@@ -141,7 +141,7 @@ class Contest:
         datetime_text = datetime_text.strip().replace('\n', '').replace('\t', '')
         res = re.match(REG_DT_TXT, datetime_text)
         if res is None or len(res.groups()) < 2:
-            raise RuntimeError('Failed to get contest period data by site resource changes')
+            raise RuntimeError('コンテスト期間データの取得に失敗しました。開発者に確認してください')
         data = {
             'title': soup.select_one('h1').text,
             'start_dt': res.group(1),
@@ -186,7 +186,7 @@ class Contest:
                 score_info[_code] = _score
             break
         else:
-            self.logger.warning('Failed to get score information')
+            self.logger.warning('スコア情報の取得に失敗しました')
 
         return score_info
 
@@ -202,14 +202,14 @@ class Contest:
             if not init_file_path.is_file():
                 RuntimeError
         except RuntimeError:
-            self.logger.warning('No template codefile will be used')
+            self.logger.info('テンプレートが設定されていないため、空のファイルを配置しました')
         else:
             try:
                 if isinstance(init_file_path, Path):
                     with init_file_path.open(mode='r', encoding=ENCODING) as rf:
                         text_l = rf.readlines()
             except Exception as e:
-                self.logger.warning(f'Unknown error in reading [{str(init_file_path)}]:\n\t{e}')
+                self.logger.warning(f'読み込み中にエラーが発生しました [{str(init_file_path)}]:\n\t{e}')
 
         return text_l
 
@@ -220,7 +220,7 @@ class Contest:
             with target_path.open(mode='w', encoding=ENCODING) as wf:
                 wf.writelines(code_template)
         except Exception:
-            self.logger.warning(f'Failed to generate code file: {str(target_path)}')
+            self.logger.warning(f'コードファイルの生成に失敗しました: {str(target_path)}')
 
 
 def __generate_contest_dir(logger: Logger, contest_code: str) -> Contest:
@@ -231,14 +231,14 @@ def __generate_contest_dir(logger: Logger, contest_code: str) -> Contest:
         res = session.get(URL.SETTINGS)
         if res.url not in URL.SETTINGS:
             # ログインしていない
-            raise RuntimeError('not logged in')
+            raise RuntimeError('ログインしてください')
 
         # コンテストが存在することを確認する
         try:
             get_soup(session, URL.contest(contest_code))
         except RuntimeError:
             # 存在しない
-            raise RuntimeError(f'unpublished contest: {contest_code}')
+            raise RuntimeError(f'未公開のコンテストです: {contest_code}')
 
     # フォルダを作成する
     current_dir = Path.cwd()
@@ -247,7 +247,7 @@ def __generate_contest_dir(logger: Logger, contest_code: str) -> Contest:
     try:
         new_dir.mkdir(parents=True)
     except Exception:
-        raise RuntimeError(f'Failed to make contest directory: {contest_code}')
+        raise RuntimeError(f'コンテストフォルダの作成に失敗しました: {contest_code}')
 
     # 保存する
     contest_info = {

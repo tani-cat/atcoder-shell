@@ -1,12 +1,12 @@
 from logging import Logger
 import re
-from typing import Sequence
+from typing import Dict, List, Sequence
 
 from bs4.element import Tag
 from tabulate import tabulate
 
 from .contest.contest import Contest
-from .utils import CookieSession, get_soup, search_contest_json, URL
+from .utils import get_soup, search_contest_json, CookieSession, URL
 
 
 def _add_judge_color(judge: str) -> str:
@@ -21,7 +21,7 @@ def _add_judge_color(judge: str) -> str:
 
 def _get_submission(logger: Logger, contest: Contest, page_limit: int = 50):
     """提出結果を取得する"""
-    tr_l: list[Tag] = []
+    tr_l: List[Tag] = []
     with CookieSession() as session:
         for page in range(1, page_limit + 1):
             try:
@@ -41,7 +41,7 @@ def _get_submission(logger: Logger, contest: Contest, page_limit: int = 50):
 
     # regex
     REG_TITLE = re.compile('(.+) - .*')
-    result_l: list[dict] = []
+    result_l: List[Dict] = []
     for tr in tr_l:
         result_l.append({
             'key': REG_TITLE.match(tr.select('td')[1].a.text).groups()[0],
