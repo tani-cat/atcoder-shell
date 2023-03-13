@@ -52,6 +52,13 @@ class Contest:
             task_info = load_json(self.task_path(task_key))
             self.tasks[task_key].update(task_info)
 
+    def __str__(self):
+        return self.__getattribute__('code')
+
+    @property
+    def contest_name(self):
+        return self.__getattribute__('title')
+
     @property
     def contest_dict(self) -> Dict:
         resp = dict()

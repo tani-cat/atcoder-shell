@@ -2,7 +2,7 @@ from logging import getLogger, StreamHandler, INFO, Formatter
 from typing import Sequence
 
 from .contest.contest import load_contest
-from . import help, login, cheetsheet, task_run
+from . import cheetsheet, help, login, result, task_run
 
 
 class ACShell:
@@ -27,29 +27,26 @@ class ACShell:
 
     def exit_code(self) -> int:
         """Return the program exit code."""
-        # if self.catastrophic_failure:
-        #     return 1
-        # assert self.options is not None
-        # if self.options.exit_zero:
-        #     return 0
-        # else:
-        #     return int(self.result_count > 0)
         return self.exec_code
 
     def operate_command(self, argv: Sequence[str]) -> None:
         """コマンドの識別と実行処理
         """
         _exec_command = argv[0]
-        if _exec_command == 'help':
+        if _exec_command in ('help', 'h'):
             return help.help(self.logger, argv[1:])
-        elif _exec_command == 'login':
+        elif _exec_command in ('login', 'lg'):
             return login.login(self.logger, argv[1:])
-        elif _exec_command == 'load':
+        elif _exec_command in  ('load', 'ld'):
             return load_contest(self.logger, argv[1:])
-        elif _exec_command == 'check':
+        elif _exec_command in ('check', 'c'):
             return task_run.check_testcase(self.logger, argv[1:])
-        elif _exec_command == 'submit':
+        elif _exec_command in ('submit', 's'):
             return task_run.submit_code(self.logger, argv[1:])
+        elif _exec_command in ('recent', 'rc'):
+            return result.recent_result(self.logger, argv[1:])
+        elif _exec_command in ('status', 'rs'):
+            return result.status(self.logger, argv[1:])
         elif _exec_command == 'add-cheet':
             return cheetsheet.extend_cheetsheet(self.logger, argv[1:])
         else:

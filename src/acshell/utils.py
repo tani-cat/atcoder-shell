@@ -2,7 +2,7 @@ import http
 import json
 import os
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 import appdirs
 from bs4 import BeautifulSoup
@@ -133,6 +133,23 @@ class URL:
         _res = cls.contest(contest) + '/submit'
         if isinstance(task, str):
             return _res + '?taskScreenName=' + task
+
+        return _res
+
+    @classmethod
+    def result(
+        cls, contest: str, task: str = None, submission_id: Union[int, str] = None, page: int = 1,
+    ) -> str:
+        _res = cls.contest(contest) + '/submissions'
+        if isinstance(submission_id, (int, str)):
+            # id指定がある場合はその結果を取得する
+            _res += '/' + str(submission_id)
+        else:
+            # id指定がなければ自分の提出を取得する
+            _res += f'/me?page={page}'
+            if isinstance(task, str):
+                # 問題指定
+                _res += '&f.Task=' + task
 
         return _res
 

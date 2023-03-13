@@ -37,6 +37,9 @@ class Task:
         for key, value in task_info.items():
             self.__setattr__(f'{key}', value)
 
+    def __str__(self):
+        return self.__getattribute__('code')
+
     @property
     def task_info(self) -> Dict:
         resp = dict()
