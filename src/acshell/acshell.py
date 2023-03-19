@@ -51,6 +51,8 @@ class ACShell:
             return cheetsheet.open_cheet_dir(self.logger, argv[1:])
         elif _exec_command in ('add-cheet', 'ac'):
             return cheetsheet.extend_cheetsheet(self.logger, argv[1:])
+        elif _exec_command in ('list-cheet', 'lc'):
+            return cheetsheet.list_cheet_file(self.logger, argv[1:])
         else:
             # その他の入力
             raise NotImplementedError

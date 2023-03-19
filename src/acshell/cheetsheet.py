@@ -48,3 +48,13 @@ def open_cheet_dir(logger: Logger, argv: Sequence[str]) -> int:
     logger.info(f'フォルダ: {cheet_path}')
     subprocess.run(f'open {cheet_path}', shell=True)
     return 0
+
+
+def list_cheet_file(logger: Logger, argv: Sequence[str]) -> int:
+    """チートシートの一覧を表示する"""
+    cheet_path = get_cheet_dir()
+    logger.info(f'フォルダ: {cheet_path}')
+    file_l = sorted(list(file for file in cheet_path.glob('*.py')))
+    for file in file_l:
+        print(f'\t{file.stem}')
+    return 0

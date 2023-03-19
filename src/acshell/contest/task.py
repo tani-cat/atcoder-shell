@@ -4,7 +4,7 @@ from pathlib import Path
 import re
 import subprocess
 import time
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from ..consts import ENCODING, LANG_TABLE
 from ..utils import (
@@ -106,11 +106,17 @@ class Task:
 
     def __execute_code(
         self, lang: str, codefile_path: Path, test_in: str, test_out: str,
+        label: Optional[str] = None,
     ) -> Tuple[bool, str]:
         res_text = []
         res_flg = False
         if lang not in LANG_TABLE:
             raise RuntimeError(f'定義されていない言語: {lang}')
+
+        if isinstance(label, str):
+            disp_label = f'{self.code} ({label})'
+        else:
+            disp_label = self.code
 
         exec_lang = LANG_TABLE[lang]
         try:
@@ -121,17 +127,18 @@ class Task:
                 input=test_in.encode(),
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                timeout=self.time_limit,
+                timeout=self.time_limit + 2,
             )
             proc_t = int((time.time() - sta) * 1000)
         except subprocess.TimeoutExpired:
-            res_text.append(f'{self.code}: TLE[{self.time_limit} sec]')
+            proc_t = int((time.time() - sta) * 1000)
+            res_text.append(f'{disp_label}: TLE[{proc_t} > {self.time_limit * 1000} msec]')
         else:
             stdout = res.stdout.decode()
             stderr = res.stderr.decode()
             if len(stderr) > 0:
                 # 標準エラー
-                res_text.append(f'{self.code}: {proc_t} msec')
+                res_text.append(f'{disp_label}: {proc_t} msec')
                 if len(stdout) > 0:
                     # 標準出力があれば併記
                     res_text.append('[output]')
@@ -141,11 +148,11 @@ class Task:
                 res_text += stderr.split('\n')
             elif test_out == stdout:
                 # 想定出力と一致
-                res_text.append(f'OK: {self.code}: {proc_t} msec')
+                res_text.append(f'OK: {disp_label}: {proc_t} msec')
                 res_flg = True
             else:
                 # 想定出力と異なる
-                res_text.append(f'NG: {self.code}: {proc_t} msec')
+                res_text.append(f'NG: {disp_label}: {proc_t} msec')
                 # 想定出力と実際出力を表示
                 res_text.append('[predict output]')
                 res_text += test_out.split('\n')
@@ -184,14 +191,14 @@ class Task:
         if not self.testcases:
             self.update_testcase()
 
-        # TODO: コードファイルのマージ機能
-        codefile_path = self.json_path.parent.joinpath(self.code + '.py')
+        codefile_path = self.__merge_code_file()
         os.chdir(str(self.json_path.parent))
 
         counter = {True: 0, False: 0}
-        for case in self.testcases:
+        for i, case in enumerate(self.testcases):
             res_flg, res_text = \
-                self.__execute_code(lang, codefile_path, case['input'], case['output'])
+                self.__execute_code(
+                    lang, codefile_path, case['input'], case['output'], f'Case {i + 1}')
             counter[res_flg] += 1
             if res_flg:
                 self.logger.info(res_text)
