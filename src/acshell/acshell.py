@@ -39,6 +39,8 @@ class ACShell:
             return login.login(self.logger, argv[1:])
         elif _exec_command in  ('load', 'ld'):
             return load_contest(self.logger, argv[1:])
+        elif _exec_command in ('test', 't'):
+            return task_run.test_code(self.logger, argv[1:])
         elif _exec_command in ('check', 'c'):
             return task_run.check_testcase(self.logger, argv[1:])
         elif _exec_command in ('submit', 's'):

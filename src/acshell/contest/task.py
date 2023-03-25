@@ -185,17 +185,28 @@ class Task:
             save_json(self.json_path, self.task_info)
             self.logger.info(f'問題のテストケースを更新しました: {self.code}')
 
-    def run_testcase(self, lang: str) -> None:
+    def run_testcase(self, lang: str, target: str = None) -> None:
         """テストケースの実行
         """
         if not self.testcases:
             self.update_testcase()
+
+        if target is None:
+            target = list(range(len(self.testcases)))
+        else:
+            try:
+                target = [int(target)]
+            except ValueError:
+                self.logger.error('テストケースの番号は整数で指定してください')
+                return
 
         codefile_path = self.__merge_code_file()
         os.chdir(str(self.json_path.parent))
 
         counter = {True: 0, False: 0}
         for i, case in enumerate(self.testcases):
+            if i not in target:
+                continue
             res_flg, res_text = \
                 self.__execute_code(
                     lang, codefile_path, case['input'], case['output'], f'Case {i + 1}')

@@ -42,3 +42,22 @@ def submit_code(logger: Logger, argv: Sequence[str]) -> int:
     task.submit_code(SUB_LANG_TABLE[lang])
 
     return 0
+
+
+def test_code(logger: Logger, argv: Sequence[str]) -> int:
+    """単一のテストケースでチェックする
+    """
+    lang = list(LANG_TABLE.keys())[0]
+    task_code = ''
+    if len(argv) >= 3:
+        lang = argv[1]
+    if len(argv) >= 2:
+        task_code = argv[0]
+        test_num = argv[1]
+    else:
+        raise RuntimeError('オプションが不足しています')
+
+    task_path = search_task_json(task_code)
+    task = Task(logger, task_path)
+    task.run_testcase(lang, test_num)
+    return 0

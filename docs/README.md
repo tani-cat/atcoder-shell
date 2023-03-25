@@ -35,10 +35,12 @@ acsh load agc001
 ### 5. 公開されたテストケースで実行する
 
 ```shell
+acsh test [:task] [:num] [lang]
 acsh check [:task] [:lang]
 ```
 
 - [task]: (必須)問題の記号（A、Bなど）を指定
+- [num]: (testで必須)テストケースの番号を指定
 - [lang]: (任意)実行言語を指定(python/pypyから選択)
 
 ### 6. コードを提出する
