@@ -41,17 +41,17 @@ HELP_TEXT = {
         'args': '',
         'text': 'コンテストでの得点状況を取得する'
     },
-    'edit-cheet': {
+    'edit-cheat': {
         'short': 'ec',
         'args': '',
         'text': 'チートシートのフォルダを開く'
     },
-    'add-cheet': {
+    'add-cheat': {
         'short': 'ac',
-        'args': '<task_code> <cheetsheet_name>',
-        'text': 'チートシート <cheetsheet_name> を問題 <task_code> のフォルダに追加する'
+        'args': '<task_code> <cheatsheet_name>',
+        'text': 'チートシート <cheatsheet_name> を問題 <task_code> のフォルダに追加する'
     },
-    'list-cheet': {
+    'list-cheat': {
         'short': 'lc',
         'args': '',
         'text': 'チートシートの一覧を表示する'

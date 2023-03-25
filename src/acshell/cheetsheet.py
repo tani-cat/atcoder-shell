@@ -3,10 +3,10 @@ import subprocess
 from typing import Sequence
 
 from .consts import ENCODING
-from .utils import get_cheet_dir, search_contest_json
+from .utils import get_cheat_dir, search_contest_json
 
 
-def extend_cheetsheet(logger: Logger, argv: Sequence[str]) -> int:
+def extend_cheatsheet(logger: Logger, argv: Sequence[str]) -> int:
     """チートシートをコードファイルに追加する
     """
     if len(argv) < 2:
@@ -24,14 +24,14 @@ def extend_cheetsheet(logger: Logger, argv: Sequence[str]) -> int:
         raise RuntimeError(f'問題コードが見つかりません: {task_code}')
 
     # チートシート
-    cheet_dir = get_cheet_dir()
-    cheet_path = cheet_dir / sheet_name
-    if not cheet_path.is_file():
+    cheat_dir = get_cheat_dir()
+    cheat_path = cheat_dir / sheet_name
+    if not cheat_path.is_file():
         # チートシートがない
         raise RuntimeError(f'チートシートが見つかりません: {sheet_name}')
 
     # ファイルをコピーして追加する
-    with cheet_path.open(encoding=ENCODING) as rf:
+    with cheat_path.open(encoding=ENCODING) as rf:
         data = rf.read()
 
     target_path = target_dir / sheet_name
@@ -42,19 +42,19 @@ def extend_cheetsheet(logger: Logger, argv: Sequence[str]) -> int:
     return 0
 
 
-def open_cheet_dir(logger: Logger, argv: Sequence[str]) -> int:
+def open_cheat_dir(logger: Logger, argv: Sequence[str]) -> int:
     """チートシートフォルダを開く"""
-    cheet_path = get_cheet_dir()
-    logger.info(f'フォルダ: {cheet_path}')
-    subprocess.run(f'open {cheet_path}', shell=True)
+    cheat_path = get_cheat_dir()
+    logger.info(f'フォルダ: {cheat_path}')
+    subprocess.run(f'open {cheat_path}', shell=True)
     return 0
 
 
-def list_cheet_file(logger: Logger, argv: Sequence[str]) -> int:
+def list_cheat_file(logger: Logger, argv: Sequence[str]) -> int:
     """チートシートの一覧を表示する"""
-    cheet_path = get_cheet_dir()
-    logger.info(f'フォルダ: {cheet_path}')
-    file_l = sorted(list(file for file in cheet_path.glob('*.py')))
+    cheat_path = get_cheat_dir()
+    logger.info(f'フォルダ: {cheat_path}')
+    file_l = sorted(list(file for file in cheat_path.glob('*.py')))
     for file in file_l:
         print(f'\t{file.stem}')
     return 0

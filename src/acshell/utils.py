@@ -89,7 +89,7 @@ def search_task_json(task_code: str) -> Optional[Path]:
     raise RuntimeError(f'タスクが見つかりません: {task_code}')
 
 
-def get_cheet_dir() -> Path:
+def get_cheat_dir() -> Path:
     """チートシートディレクトリを取得する
     """
     env_path = os.environ.get('ACSHELL_PATH', '')

@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from ..consts import ENCODING
 from ..utils import (
     CookieSession, URL, get_soup, save_json, search_contest_json, load_json,
-    get_cheet_dir,
+    get_cheat_dir,
 )
 
 
@@ -197,8 +197,8 @@ class Contest:
         init_file_path: Optional[Path] = None
         text_l = ['']
         try:
-            cheet_dir = get_cheet_dir()
-            init_file_path = cheet_dir / 'initial.py'
+            cheat_dir = get_cheat_dir()
+            init_file_path = cheat_dir / 'initial.py'
             if not init_file_path.is_file():
                 RuntimeError
         except RuntimeError:

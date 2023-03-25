@@ -1,81 +1,113 @@
 # AtCoder Shell
 
-AtCoderの各種操作をコマンドラインで実行するライブラリ
+This is the shell library to execute AtCoder submission on your commandline, for Python/PyPy user.
 
-## 基本操作
+## Basic operation
 
-### 1. インストール
+If you want to know more information about commands, execute `acsh help`.
+(Note that the command results are output in Japanese.)
+
+### 1. Installation
 
 ```shell
 pip install acshell
 ```
 
-### 2. ログイン
+### 2. Login
 
 ```shell
 acsh login
+# acsh lg
 ```
 
-- ログインする
-- ログイン情報は一定期間保持される
+Your account credentials are stored for a certain period of time.
 
-### 3. コンテストフォルダを作成する
+### 3. Create "Contest folder"
 
 ```shell
 acsh load agc001
+# acsh ld agc001
 ```
 
-- 現在いるフォルダにコンテストフォルダを作成する
-- コンテストフォルダには問題ごとのフォルダが作成される
+The "contest folder" of specified contest is created where you are currently. Each task folder is generated in the contest folder.
 
-### 4. 解答コードを実装する
+### 4. Write your code
 
-- 問題ごとのフォルダに作成された `agc001_a.py` のようなファイルに解答を実装する
+Implement the answers in the file like `agc001_a.py` created in the folder for each task.
 
-### 5. 公開されたテストケースで実行する
+### 5. Run your codes with published testcases
+
+Confirm the formats of the command arguments below.
 
 ```shell
-acsh test [:task] [:num] [lang]
-acsh check [:task] [:lang]
+acsh test [task] [num] [lang]
+acsh check [task] [lang]
+# acsh t
+# acsh c
 ```
 
-- [task]: (必須)問題の記号（A、Bなど）を指定
-- [num]: (testで必須)テストケースの番号を指定
-- [lang]: (任意)実行言語を指定(python/pypyから選択)
+| option | required | value format |
+| :-- | :-: | :-- |
+| task | Yes | task code such as `A`, `B` |
+| num | Yes (in `test`) | number of testcase as integer |
+| lang | x | language(`python` or `pypy`) |
 
-### 6. コードを提出する
+### 6. Submit your codes
+
+Confirm the formats of the command arguments below. Unlike the test running, you have to specify which language you submit codes as.
 
 ```shell
-acsh submit [:task] [:lang]
+acsh submit [task] [lang]
+# acsh s
 ```
 
-- 現在いるフォルダの問題のコード(main.py)を提出する
-- 言語を pypy または python から選択する必要がある
+| option | required | value format |
+| :-- | :-: | :-- |
+| task | Yes | task code such as `A`, `B` |
+| lang | **Yes** | language(`python` or `pypy`) |
 
-- [task]: (必須)問題の記号（A、Bなど）を指定
-- [lang]: (必須)実行言語を指定(python/pypyから選択)
+### 7. Confirm results of your submission
 
-## 応用編
+```shell
+acsh recent  # for recent submission
+acsh status  # for your contest scores
+# acsh rc
+# acsh rs
+```
 
-### チートシートを利用する
+## Additional Operations
 
-自分で事前に用意したコードファイルを利用したい場合は、以下の手順で利用することができます
+### Setup your cheat sheets
 
-1. `acsh edit-cheet' を実行し、チートシートフォルダを開く
-2. 開かれたフォルダに、用意したコードファイルを配置しておく
-3. `acsh add-cheet` を実行し、問題フォルダにチートシートのファイルをコピーする
-4. 元の解答コードに `import ファイル名` を追加する
-5. 実行時・提出時に自動的にチートシートが結合されます
+Follow the steps below to use your own prepared cheat-sheet codes,
+Please check the arguments with the `acsh help` command.
 
-### pyenvで環境管理する場合
+#### Setup
 
-1. `3.8.*` 、 `pypy3.7-7.3.*` の最新をインストールしてください
-2. コマンドを実行してください
+1. open the config folder by executing `acsh edit-cheat` / `acsh ec`.
+2. write your cheat sheets, and place the folder opened.
+
+#### Usage
+
+1. execute `acsh add-cheat <task_code> <cheat_name (without extension)>` so add the specified cheat file in the task folder.
+2. write `from <filename> import <func/class name>` in your code.
+3. The cheat files will be merged with main code file when you submit.
+
+### Setup initial codes
+
+If you want to set a template code, add `initial.py` in the cheat-sheet setup shown above.
+
+### Pyenv management
+
+If you want to run codes by pypy, you should use pyenv for python version management.
+
+1. Install the latest version of `3.8.*` and `pypy3.7-7.3.*`.
+2. execute the command below.
 
 ```shell
 pyenv A B C
 ```
 
-- A: 自分が普段使っているバージョン
-- B: インストールした3.8.*のバージョン
-- C: インストールしたpypy3.7-7.3.*のバージョン
+- A: The Python version you usually use
+- B: The version of installed `3.8.*`
+- C: The version of installed `pypy3.7-7.3.*`

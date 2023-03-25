@@ -8,7 +8,7 @@ from typing import Dict, List, Optional, Tuple
 
 from ..consts import ENCODING, LANG_TABLE
 from ..utils import (
-    get_soup, load_json, get_cheet_dir, print_bar, save_json, CookieSession, URL
+    get_soup, load_json, get_cheat_dir, print_bar, save_json, CookieSession, URL
 )
 
 
@@ -65,8 +65,8 @@ class Task:
 
         # チートシートも取得しておく
         try:
-            cheet_dir = get_cheet_dir()
-            for file in cheet_dir.joinpath('cheetsheets').glob('**/*.py'):
+            cheat_dir = get_cheat_dir()
+            for file in cheat_dir.joinpath('cheatsheets').glob('**/*.py'):
                 codefile_table[file.stem] = file
         except RuntimeError as e:
             self.logger.warning(str(e))

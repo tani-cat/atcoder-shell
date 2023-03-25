@@ -2,7 +2,7 @@ from logging import getLogger, StreamHandler, INFO, Formatter
 from typing import Sequence
 
 from .contest.contest import load_contest
-from . import cheetsheet, help, login, result, task_run
+from . import cheatsheet, help, login, result, task_run
 
 
 class ACShell:
@@ -49,12 +49,12 @@ class ACShell:
             return result.recent_result(self.logger, argv[1:])
         elif _exec_command in ('status', 'rs'):
             return result.status(self.logger, argv[1:])
-        elif _exec_command in ('edit-cheet', 'ec'):
-            return cheetsheet.open_cheet_dir(self.logger, argv[1:])
-        elif _exec_command in ('add-cheet', 'ac'):
-            return cheetsheet.extend_cheetsheet(self.logger, argv[1:])
-        elif _exec_command in ('list-cheet', 'lc'):
-            return cheetsheet.list_cheet_file(self.logger, argv[1:])
+        elif _exec_command in ('edit-cheat', 'ec'):
+            return cheatsheet.open_cheat_dir(self.logger, argv[1:])
+        elif _exec_command in ('add-cheat', 'ac'):
+            return cheatsheet.extend_cheatsheet(self.logger, argv[1:])
+        elif _exec_command in ('list-cheat', 'lc'):
+            return cheatsheet.list_cheat_file(self.logger, argv[1:])
         else:
             # その他の入力
             raise NotImplementedError
