@@ -166,6 +166,7 @@ class Contest:
                 'name': tr.select('td')[1].a.text.strip(),
                 'time_limit': float(tr.select('td')[2].text.replace('sec', '').strip()),
                 'memory_limit': int(tr.select('td')[3].text.replace('MB', '').strip()),
+                'score': 0,
             }
 
         return task_info
