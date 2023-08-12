@@ -100,8 +100,9 @@ If you want to set a template code, add `initial.py` in the cheat-sheet setup sh
 ### Pyenv management
 
 If you want to run codes by pypy, you should use pyenv for python version management.
+(This package can be run on python3.8, but you should use 3.11 for the exact debug in contests.)
 
-1. Install the latest version of `3.8.*` and `pypy3.7-7.3.*`.
+1. Install the latest version of `3.11.*` and `pypy3.10-7.3.*`.
 2. execute the command below.
 
 ```shell
@@ -109,5 +110,5 @@ pyenv A B C
 ```
 
 - A: The Python version you usually use
-- B: The version of installed `3.8.*`
-- C: The version of installed `pypy3.7-7.3.*`
+- B: The version of installed `3.11.*`
+- C: The version of installed `pypy3.10-7.3.*`

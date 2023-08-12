@@ -35,9 +35,9 @@ class ACShell:
         _exec_command = argv[0]
         if _exec_command in ('help', 'h'):
             return help.help(self.logger, argv[1:])
-        elif _exec_command in ('login', 'lg'):
+        elif _exec_command in ('login', 'in'):
             return login.login(self.logger, argv[1:])
-        elif _exec_command in  ('load', 'ld'):
+        elif _exec_command in ('load', 'ld'):
             return load_contest(self.logger, argv[1:])
         elif _exec_command in ('test', 't'):
             return task_run.test_code(self.logger, argv[1:])
@@ -45,6 +45,8 @@ class ACShell:
             return task_run.check_testcase(self.logger, argv[1:])
         elif _exec_command in ('submit', 's'):
             return task_run.submit_code(self.logger, argv[1:])
+        elif _exec_command in ('lang', 'la'):
+            return task_run.show_language(self.logger, argv[1:])
         elif _exec_command in ('recent', 'rc'):
             return result.recent_result(self.logger, argv[1:])
         elif _exec_command in ('status', 'rs'):

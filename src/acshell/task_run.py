@@ -1,7 +1,7 @@
 from logging import Logger
 from typing import Sequence
 
-from .consts import LANG_TABLE, SUB_LANG_TABLE
+from .consts import LANG_UPDATED, LANG_TABLE, SUB_LANG_TABLE
 from .contest.task import Task
 from .utils import (
     search_task_json,
@@ -60,4 +60,21 @@ def test_code(logger: Logger, argv: Sequence[str]) -> int:
     task_path = search_task_json(task_code)
     task = Task(logger, task_path)
     task.run_testcase(lang, test_num)
+    return 0
+
+
+def show_language(logger: Logger, _: Sequence[str]) -> int:
+    """使用可能な言語を表示する
+    """
+    # テストに使える言語
+    logger.info(f'実行可能な言語 (updated on {LANG_UPDATED})')
+    for key, cmd in LANG_TABLE.items():
+        print(f'\t{key}\t-> {cmd}')
+
+    print()
+    # 提出できる言語
+    logger.info(f'提出可能な言語 (updated on {LANG_UPDATED})')
+    for key, lang in SUB_LANG_TABLE.items():
+        print(f'\t{key}\t-> {lang}')
+
     return 0

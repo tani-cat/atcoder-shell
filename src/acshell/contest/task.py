@@ -159,7 +159,7 @@ class Task:
                 res_text.append('[exact output]')
                 res_text += stdout.split('\n')
 
-        res_text[0] += f' (in {lang})'
+        res_text[0] += f' (in {LANG_TABLE[lang]})'
         return res_flg, '\n'.join(res_text)
 
     def update_testcase(self):
@@ -249,10 +249,10 @@ class Task:
 
         if res.status_code == 200:
             # 成功
-            self.logger.info(f'コードを提出しました: {self.key} (lang: {lang_dict[lang]})')
+            self.logger.info(f'コードを提出しました: {self.key} (lang: {lang})')
         else:
             # 失敗
             raise RuntimeError(
-                f'コードの提出に失敗しました: {self.key} (lang: {lang_dict[lang]})\n'
+                f'コードの提出に失敗しました: {self.key} (lang: {lang})\n'
                 f'Response Code: {res.status_code}'
             )
